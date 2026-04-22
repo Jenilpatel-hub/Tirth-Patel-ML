@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HealCare AI — Medical Scan Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8; --surface:#fff; --surface2:#e8eef5; --border:#cdd9e5;
+  --blue:#1a56a0; --blue-light:#eaf1fb; --blue-mid:#b3cef0;
+  --teal:#0a7c6e; --teal-light:#e6f7f4;
+  --red:#c0392b; --red-light:#fdf2f1; --red-mid:#f5b7b1;
+  --green:#1a7a4a; --green-light:#eaf7f0; --green-mid:#a9dfc3;
+  --amber:#b7770d; --amber-light:#fef9ec; --amber-mid:#f9d98a;
+  --orange:#c0580a; --orange-light:#fef4ec; --orange-mid:#f9c49a;
+  --purple:#6a3093; --purple-light:#f5eefb; --purple-mid:#d7b8f0;
+  --text:#0d1f33; --text2:#3d5166; --text3:#8098b0;
+  --r:14px;
+  --shadow:0 1px 4px rgba(13,31,51,.07),0 4px 18px rgba(13,31,51,.04);
+  --shadow-lg:0 4px 28px rgba(13,31,51,.10),0 1px 4px rgba(13,31,51,.06);
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Source Sans 3',Arial,sans-serif;
+  --font-mono:'Source Code Pro',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+
+body::before{
+  content:"";position:fixed;inset:0;
+  background-image:radial-gradient(circle,#b8cede 1px,transparent 1px);
+  background-size:30px 30px;opacity:.35;pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(14px);
+  border-bottom:2px solid var(--blue);
+  padding:0 48px;height:66px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,#1a56a0,#0a7c6e);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.logo-text{display:flex;flex-direction:column;line-height:1;}
+.logo-name{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--blue);letter-spacing:.3px;}
+.logo-sub{font-size:10px;font-family:var(--font-mono);color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
+.nav-links{display:flex;gap:4px;}
+.nav-links a{text-decoration:none;color:var(--text2);font-size:14px;font-weight:500;padding:7px 14px;border-radius:8px;transition:all .15s;font-family:var(--font-body);}
+.nav-links a:hover{background:var(--blue-light);color:var(--blue);}
+
+/* HERO */
+.hero{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:60px 32px 40px;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--teal-light);border:1px solid #7ecdc4;color:var(--teal);
+  font-size:11px;font-weight:600;font-family:var(--font-mono);
+  padding:5px 13px;border-radius:100px;margin-bottom:18px;letter-spacing:.5px;
+}
+.hero-badge::before{content:"";width:7px;height:7px;background:var(--teal);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.hero h1{font-family:var(--font-display);font-size:50px;line-height:1.12;letter-spacing:-.5px;margin-bottom:16px;color:var(--text);}
+.hero h1 em{font-style:italic;color:var(--blue);}
+.hero p{font-size:17px;color:var(--text2);line-height:1.75;max-width:460px;font-weight:300;}
+.hero-stats{display:flex;flex-direction:column;gap:10px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:17px 22px;box-shadow:var(--shadow);min-width:155px;text-align:center;}
+.stat-card .num{font-family:var(--font-display);font-size:28px;color:var(--blue);font-weight:700;}
+.stat-card .lbl{font-size:11px;color:var(--text3);font-weight:500;margin-top:3px;font-family:var(--font-mono);letter-spacing:.5px;}
+
+/* MAIN */
+.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 32px 60px;}
+
+/* TABS */
+.tabs-wrapper{margin-bottom:24px;}
+.tabs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px;gap:4px;box-shadow:var(--shadow);}
+.tab-btn{
+  display:flex;align-items:center;gap:8px;padding:10px 20px;border:none;border-radius:10px;
+  font-family:var(--font-body);font-size:14px;font-weight:600;
+  color:var(--text2);background:transparent;cursor:pointer;transition:all .2s;
+}
+.tab-btn:hover{background:var(--surface2);color:var(--text);}
+.tab-btn.active{color:white;}
+.tab-btn.ct.active{background:linear-gradient(135deg,#1a56a0,#154a8a);box-shadow:0 2px 8px rgba(26,86,160,.3);}
+.tab-btn.blood.active{background:linear-gradient(135deg,#c0392b,#a93226);box-shadow:0 2px 8px rgba(192,57,43,.3);}
+.tab-btn.xray.active{background:linear-gradient(135deg,#6a3093,#5b2882);box-shadow:0 2px 8px rgba(106,48,147,.3);}
+
+/* PANELS */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* CARDS */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:30px;box-shadow:var(--shadow);transition:box-shadow .2s;
+}
+.card:hover{box-shadow:var(--shadow-lg);}
+.card-title{
+  font-family:var(--font-display);font-size:16px;font-weight:500;
+  color:var(--text);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:14px;border-bottom:1px solid var(--surface2);
+}
+.card-title-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.icon-blue{background:var(--blue-light);}
+.icon-red{background:var(--red-light);}
+.icon-purple{background:var(--purple-light);}
+
+/* SCAN BADGE */
+.scan-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:16px;border:1px solid;font-family:var(--font-mono);}
+.scan-badge.ct{background:var(--blue-light);color:var(--blue);border-color:var(--blue-mid);}
+.scan-badge.blood{background:var(--red-light);color:var(--red);border-color:var(--red-mid);}
+.scan-badge.xray{background:var(--purple-light);color:var(--purple);border-color:var(--purple-mid);}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:var(--blue-light);}
+.drop-zone.blood:hover,.drop-zone.blood.dragover{border-color:var(--red);background:var(--red-light);}
+.drop-zone.xray:hover,.drop-zone.xray.dragover{border-color:var(--purple);background:var(--purple-light);}
+.drop-icon{width:52px;height:52px;border-radius:14px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;box-shadow:var(--shadow);}
+.drop-zone h3{font-family:var(--font-display);font-size:15px;font-weight:500;margin-bottom:4px;color:var(--text);}
+.drop-zone p{font-size:13px;color:var(--text3);font-family:var(--font-body);}
+.formats{display:inline-flex;gap:5px;margin-top:8px;}
+.fmt-tag{background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:5px;}
+input[type=file]{display:none;}
+.preview-img{display:none;width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:1px solid var(--border);margin-top:14px;}
+.file-info{display:none;margin-top:10px;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:500;}
+.file-info.ct{background:var(--blue-light);border:1px solid var(--blue-mid);color:var(--blue);}
+.file-info.blood{background:var(--red-light);border:1px solid var(--red-mid);color:var(--red);}
+.file-info.xray{background:var(--purple-light);border:1px solid var(--purple-mid);color:var(--purple);}
+.btn-analyse{width:100%;margin-top:16px;padding:13px;border:none;border-radius:11px;color:white;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px;}
+.btn-analyse.ct{background:linear-gradient(135deg,#1a56a0,#154a8a);box-shadow:0 2px 8px rgba(26,86,160,.3);}
+.btn-analyse.ct:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,86,160,.4);}
+.btn-analyse.blood{background:linear-gradient(135deg,#c0392b,#a93226);box-shadow:0 2px 8px rgba(192,57,43,.3);}
+.btn-analyse.blood:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(192,57,43,.4);}
+.btn-analyse.xray{background:linear-gradient(135deg,#6a3093,#5b2882);box-shadow:0 2px 8px rgba(106,48,147,.3);}
+.btn-analyse.xray:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(106,48,147,.4);}
+.btn-analyse:disabled{background:var(--surface2)!important;color:var(--text3)!important;box-shadow:none!important;cursor:not-allowed;transform:none!important;}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{margin-top:10px;padding:10px 14px;background:var(--red-light);border:1px solid var(--red-mid);border-radius:9px;font-size:13px;color:var(--red);display:none;}
+
+/* RESULT */
+.result-card{display:none;}
+.result-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--surface2);}
+.result-icon{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.icon-normal{background:var(--green-light);}
+.icon-malignant{background:var(--red-light);}
+.result-label{display:inline-block;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;font-family:var(--font-mono);}
+.label-normal{background:var(--green-light);color:var(--green);border:1px solid var(--green-mid);}
+.label-malignant{background:var(--red-light);color:var(--red);border:1px solid var(--red-mid);}
+.result-conf{font-family:var(--font-display);font-size:36px;color:var(--text);line-height:1;font-weight:700;}
+.result-sub{font-size:12px;color:var(--text3);margin-top:3px;font-family:var(--font-mono);}
+
+/* RISK */
+.risk-section{margin:18px 0;padding:16px;border-radius:12px;border:1px solid var(--border);}
+.risk-title{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;font-family:var(--font-mono);}
+.risk-steps{display:flex;gap:6px;margin-bottom:12px;}
+.risk-step{flex:1;height:6px;border-radius:50px;background:var(--surface2);}
+.risk-step.active-low{background:#1a7a4a;}
+.risk-step.active-moderate{background:#b7770d;}
+.risk-step.active-high{background:#c0580a;}
+.risk-step.active-critical{background:#c0392b;}
+.risk-info{display:flex;align-items:center;justify-content:space-between;}
+.risk-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;font-family:var(--font-body);}
+.risk-low{background:var(--green-light);color:var(--green);border:1px solid var(--green-mid);}
+.risk-moderate{background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);}
+.risk-high{background:var(--orange-light);color:var(--orange);border:1px solid var(--orange-mid);}
+.risk-critical{background:var(--red-light);color:var(--red);border:1px solid var(--red-mid);}
+.risk-desc{font-size:12px;color:var(--text3);max-width:160px;text-align:right;line-height:1.5;font-style:italic;font-family:var(--font-body);}
+
+/* BARS */
+.bar-row{margin-bottom:14px;}
+.bar-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.bar-name{font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:6px;font-family:var(--font-body);}
+.bar-dot{width:8px;height:8px;border-radius:50%;}
+.bar-val{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--text);}
+.track{height:7px;background:var(--surface2);border-radius:50px;overflow:hidden;}
+.fill{height:100%;width:0%;border-radius:50px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.fill-green{background:linear-gradient(90deg,#1a7a4a,#28a868);}
+.fill-red{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+.disclaimer{margin-top:16px;padding:12px 14px;background:#fef9ec;border:1px solid #f0d080;border-radius:9px;font-size:12px;color:#7a5a00;line-height:1.6;display:flex;gap:8px;font-style:italic;}
+
+/* HISTORY */
+.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:4px;}
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s;}
+.hist-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.hist-img-wrap{width:100%;height:120px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--text3);overflow:hidden;}
+.hist-img-wrap img{width:100%;height:120px;object-fit:cover;}
+.hist-risk-strip{height:4px;width:100%;}
+.strip-low{background:#1a7a4a;} .strip-moderate{background:#b7770d;} .strip-high{background:#c0580a;} .strip-critical{background:#c0392b;}
+.hist-body{padding:12px;}
+.hist-type{font-family:var(--font-mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.hist-pred{font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--font-body);}
+.hist-risk{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-bottom:3px;}
+.hist-conf{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+.hist-time{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--font-mono);}
+.btn-delete{width:100%;margin-top:8px;padding:6px;border:1px solid var(--red-mid);border-radius:8px;background:var(--red-light);color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-delete:hover{background:var(--red);color:white;}
+.empty-state{text-align:center;padding:36px;color:var(--text3);font-size:14px;grid-column:1/-1;font-style:italic;font-family:var(--font-body);}
+.empty-icon{font-size:34px;margin-bottom:8px;}
+
+footer{position:relative;z-index:1;text-align:center;padding:22px;border-top:2px solid var(--blue);font-size:13px;color:var(--text3);background:var(--surface);font-family:var(--font-mono);}
+footer span{color:var(--blue);font-weight:600;}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;padding:36px 20px 20px;}
+  .hero h1{font-size:36px;}
+  .hero-stats{flex-direction:row;flex-wrap:wrap;}
+  .grid{grid-template-columns:1fr;}
+  nav{padding:0 20px;}
+  .main{padding:0 20px 40px;}
+  .tabs{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">⚕️</div>
+    <div class="logo-text">
+      <span class="logo-name">HealCare AI</span>
+      <span class="logo-sub">Medical Scan Analysis</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#tool">Diagnose</a>
+    <a href="#history">History</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hero-badge">⚕️ AI-Powered Medical Analysis</div>
+    <h1>Detect Abnormalities<br>with <em>Clinical Precision</em></h1>
+    <p>Upload blood reports, CT scans, or X-rays. Our deep learning model analyses tissue patterns and assigns a risk level — instantly.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="num">4</div><div class="lbl">Risk Levels</div></div>
+    <div class="stat-card"><div class="num">3</div><div class="lbl">Scan Types</div></div>
+    <div class="stat-card"><div class="num">AI</div><div class="lbl">Deep Learning</div></div>
+  </div>
+</section>
+
+<main class="main" id="tool">
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn ct active" onclick="switchTab('ct')"><span>🫁</span> CT Scan</button>
+      <button class="tab-btn blood" onclick="switchTab('blood')"><span>🩸</span> Blood Report</button>
+      <button class="tab-btn xray" onclick="switchTab('xray')"><span>🩻</span> X-Ray</button>
+    </div>
+  </div>
+
+  <!-- CT SCAN -->
+  <div class="tab-panel active" id="panel-ct">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon icon-blue">📤</div>Upload CT Scan</div>
+        <div class="scan-badge ct">🫁 CT Scan Analysis</div>
+        <label class="drop-zone ct" for="fileInput-ct" id="drop-ct">
+          <div class="drop-icon">🫁</div>
+          <h3>Click to Upload CT Scan</h3>
+          <p>or drag and drop your image</p>
+          <div class="formats"><span class="fmt-tag">PNG</span><span class="fmt-tag">JPG</span><span class="fmt-tag">JPEG</span></div>
+        </label>
+        <input type="file" id="fileInput-ct" accept="image/*">
+        <img class="preview-img" id="preview-ct">
+        <div class="file-info ct" id="fileInfo-ct">📎 <span id="fileName-ct"></span></div>
+        <div class="error-msg" id="error-ct"></div>
+        <button class="btn-analyse ct" id="btn-ct" disabled>
+          <div class="spinner" id="spinner-ct"></div>
+          <span id="btnText-ct">Select an image first</span>
+        </button>
+      </div>
+      <div class="card result-card" id="result-ct">
+        <div class="card-title"><div class="card-title-icon icon-blue">📊</div>Diagnosis Report</div>
+        <div class="result-header">
+          <div class="result-icon" id="rIcon-ct"></div>
+          <div>
+            <div class="result-label" id="rBadge-ct">---</div>
+            <div class="result-conf" id="rConf-ct">0%</div>
+            <div class="result-sub">Confidence Score</div>
+          </div>
+        </div>
+        <div class="risk-section" id="riskSection-ct">
+          <div class="risk-title">Patient Risk Level</div>
+          <div class="risk-steps">
+            <div class="risk-step" id="rs-ct-1"></div><div class="risk-step" id="rs-ct-2"></div>
+            <div class="risk-step" id="rs-ct-3"></div><div class="risk-step" id="rs-ct-4"></div>
+          </div>
+          <div class="risk-info">
+            <div class="risk-badge" id="riskBadge-ct"></div>
+            <div class="risk-desc" id="riskDesc-ct"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#1a7a4a"></span>Normal</span><span class="bar-val" id="nVal-ct">0%</span></div>
+          <div class="track"><div class="fill fill-green" id="nBar-ct"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#c0392b"></span>Malignant</span><span class="bar-val" id="mVal-ct">0%</span></div>
+          <div class="track"><div class="fill fill-red" id="mBar-ct"></div></div>
+        </div>
+        <div class="disclaimer">⚕️ <span>This report is for research purposes only. Always consult a licensed physician before making any medical decisions.</span></div>
+      </div>
+    </div>
+    <div class="card" id="history">
+      <div class="card-title"><div class="card-title-icon icon-blue">🕒</div>CT Scan History</div>
+      <div class="history-grid" id="histGrid-ct"><div class="empty-state"><div class="empty-icon">🫁</div>No CT scans analysed yet.</div></div>
+    </div>
+  </div>
+
+  <!-- BLOOD REPORT -->
+  <div class="tab-panel" id="panel-blood">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon icon-red">📤</div>Upload Blood Report</div>
+        <div class="scan-badge blood">🩸 Blood Report Analysis</div>
+        <label class="drop-zone blood" for="fileInput-blood" id="drop-blood">
+          <div class="drop-icon">🩸</div>
+          <h3>Click to Upload Blood Report</h3>
+          <p>Photo or scan of your report</p>
+          <div class="formats"><span class="fmt-tag">PNG</span><span class="fmt-tag">JPG</span><span class="fmt-tag">JPEG</span></div>
+        </label>
+        <input type="file" id="fileInput-blood" accept="image/*">
+        <img class="preview-img" id="preview-blood">
+        <div class="file-info blood" id="fileInfo-blood">📎 <span id="fileName-blood"></span></div>
+        <div class="error-msg" id="error-blood"></div>
+        <button class="btn-analyse blood" id="btn-blood" disabled>
+          <div class="spinner" id="spinner-blood"></div>
+          <span id="btnText-blood">Select an image first</span>
+        </button>
+      </div>
+      <div class="card result-card" id="result-blood">
+        <div class="card-title"><div class="card-title-icon icon-red">📊</div>Diagnosis Report</div>
+        <div class="result-header">
+          <div class="result-icon" id="rIcon-blood"></div>
+          <div>
+            <div class="result-label" id="rBadge-blood">---</div>
+            <div class="result-conf" id="rConf-blood">0%</div>
+            <div class="result-sub">Confidence Score</div>
+          </div>
+        </div>
+        <div class="risk-section" id="riskSection-blood">
+          <div class="risk-title">Patient Risk Level</div>
+          <div class="risk-steps">
+            <div class="risk-step" id="rs-blood-1"></div><div class="risk-step" id="rs-blood-2"></div>
+            <div class="risk-step" id="rs-blood-3"></div><div class="risk-step" id="rs-blood-4"></div>
+          </div>
+          <div class="risk-info">
+            <div class="risk-badge" id="riskBadge-blood"></div>
+            <div class="risk-desc" id="riskDesc-blood"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#1a7a4a"></span>Normal</span><span class="bar-val" id="nVal-blood">0%</span></div>
+          <div class="track"><div class="fill fill-green" id="nBar-blood"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#c0392b"></span>Abnormal</span><span class="bar-val" id="mVal-blood">0%</span></div>
+          <div class="track"><div class="fill fill-red" id="mBar-blood"></div></div>
+        </div>
+        <div class="disclaimer">⚕️ <span>This report is for research purposes only. Always consult a licensed physician before making any medical decisions.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-icon icon-red">🕒</div>Blood Report History</div>
+      <div class="history-grid" id="histGrid-blood"><div class="empty-state"><div class="empty-icon">🩸</div>No blood reports analysed yet.</div></div>
+    </div>
+  </div>
+
+  <!-- X-RAY -->
+  <div class="tab-panel" id="panel-xray">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon icon-purple">📤</div>Upload X-Ray</div>
+        <div class="scan-badge xray">🩻 X-Ray Analysis</div>
+        <label class="drop-zone xray" for="fileInput-xray" id="drop-xray">
+          <div class="drop-icon">🩻</div>
+          <h3>Click to Upload X-Ray</h3>
+          <p>or drag and drop your image</p>
+          <div class="formats"><span class="fmt-tag">PNG</span><span class="fmt-tag">JPG</span><span class="fmt-tag">JPEG</span></div>
+        </label>
+        <input type="file" id="fileInput-xray" accept="image/*">
+        <img class="preview-img" id="preview-xray">
+        <div class="file-info xray" id="fileInfo-xray">📎 <span id="fileName-xray"></span></div>
+        <div class="error-msg" id="error-xray"></div>
+        <button class="btn-analyse xray" id="btn-xray" disabled>
+          <div class="spinner" id="spinner-xray"></div>
+          <span id="btnText-xray">Select an image first</span>
+        </button>
+      </div>
+      <div class="card result-card" id="result-xray">
+        <div class="card-title"><div class="card-title-icon icon-purple">📊</div>Diagnosis Report</div>
+        <div class="result-header">
+          <div class="result-icon" id="rIcon-xray"></div>
+          <div>
+            <div class="result-label" id="rBadge-xray">---</div>
+            <div class="result-conf" id="rConf-xray">0%</div>
+            <div class="result-sub">Confidence Score</div>
+          </div>
+        </div>
+        <div class="risk-section" id="riskSection-xray">
+          <div class="risk-title">Patient Risk Level</div>
+          <div class="risk-steps">
+            <div class="risk-step" id="rs-xray-1"></div><div class="risk-step" id="rs-xray-2"></div>
+            <div class="risk-step" id="rs-xray-3"></div><div class="risk-step" id="rs-xray-4"></div>
+          </div>
+          <div class="risk-info">
+            <div class="risk-badge" id="riskBadge-xray"></div>
+            <div class="risk-desc" id="riskDesc-xray"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#1a7a4a"></span>Normal</span><span class="bar-val" id="nVal-xray">0%</span></div>
+          <div class="track"><div class="fill fill-green" id="nBar-xray"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span class="bar-name"><span class="bar-dot" style="background:#c0392b"></span>Abnormal</span><span class="bar-val" id="mVal-xray">0%</span></div>
+          <div class="track"><div class="fill fill-red" id="mBar-xray"></div></div>
+        </div>
+        <div class="disclaimer">⚕️ <span>This report is for research purposes only. Always consult a licensed physician before making any medical decisions.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-icon icon-purple">🕒</div>X-Ray History</div>
+      <div class="history-grid" id="histGrid-xray"><div class="empty-state"><div class="empty-icon">🩻</div>No X-rays analysed yet.</div></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>© 2026 HealCare AI &nbsp;·&nbsp; Flask + TensorFlow + SQLite &nbsp;·&nbsp; Built by <span>Tirth</span></footer>
+
+<script>
+const RISK_CONFIG = {
+  Low:      { steps:1, cls:'risk-low',      stripCls:'strip-low',      icon:'🟢', desc:'No immediate concern detected' },
+  Moderate: { steps:2, cls:'risk-moderate', stripCls:'strip-moderate', icon:'🟡', desc:'Monitor closely, consult a doctor' },
+  High:     { steps:3, cls:'risk-high',     stripCls:'strip-high',     icon:'🟠', desc:'Further investigation recommended' },
+  Critical: { steps:4, cls:'risk-critical', stripCls:'strip-critical', icon:'🔴', desc:'Immediate medical attention advised' }
+}
+const STEP_ACTIVE = { 1:'active-low', 2:'active-moderate', 3:'active-high', 4:'active-critical' }
+
+function switchTab(type) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  document.getElementById('panel-' + type).classList.add('active')
+  document.querySelector('.tab-btn.' + type).classList.add('active')
+}
+
+const TABS = [
+  { type:'ct',    scanType:'ct_scan',      label2:'Malignant', emptyIcon:'🫁', emptyText:'CT scans' },
+  { type:'blood', scanType:'blood_report', label2:'Abnormal',  emptyIcon:'🩸', emptyText:'blood reports' },
+  { type:'xray',  scanType:'xray',         label2:'Abnormal',  emptyIcon:'🩻', emptyText:'X-rays' }
+]
+
+TABS.forEach(({ type, scanType, label2, emptyIcon, emptyText }) => {
+  const fileInput = document.getElementById(`fileInput-${type}`)
+  const dropZone  = document.getElementById(`drop-${type}`)
+  const preview   = document.getElementById(`preview-${type}`)
+  const fileInfo  = document.getElementById(`fileInfo-${type}`)
+  const fileName  = document.getElementById(`fileName-${type}`)
+  const btn       = document.getElementById(`btn-${type}`)
+  const btnText   = document.getElementById(`btnText-${type}`)
+  const spinner   = document.getElementById(`spinner-${type}`)
+  const errorMsg  = document.getElementById(`error-${type}`)
+  let currentFile = null
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover') })
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'))
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]) })
+  fileInput.addEventListener('change', function() { if (this.files[0]) handleFile(this.files[0]) })
+
+  function handleFile(file) {
+    currentFile = file
+    preview.src = URL.createObjectURL(file)
+    preview.style.display = 'block'
+    fileInfo.style.display = 'block'
+    fileName.textContent = file.name
+    btn.disabled = false
+    btnText.textContent = 'Analyse Image'
+    errorMsg.style.display = 'none'
+  }
+
+  btn.addEventListener('click', async () => {
+    if (!currentFile) return
+    btn.disabled = true; btnText.textContent = 'Analysing...'; spinner.style.display = 'block'; errorMsg.style.display = 'none'
+    const fd = new FormData()
+    fd.append('file', currentFile)
+    fd.append('scan_type', scanType)
+    try {
+      const res = await fetch('/predict', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.error) {
+        errorMsg.textContent = data.error + (data.details ? ': ' + data.details : '')
+        errorMsg.style.display = 'block'
+      } else {
+        renderResult(type, data, label2)
+        loadHistory(type, scanType, emptyIcon, emptyText)
+      }
+    } catch(e) {
+      errorMsg.textContent = 'Network error. Is the server running?'
+      errorMsg.style.display = 'block'
+    }
+    btn.disabled = false; btnText.textContent = 'Analyse Image'; spinner.style.display = 'none'
+  })
+
+  loadHistory(type, scanType, emptyIcon, emptyText)
+})
+
+function renderResult(type, data, label2) {
+  const box = document.getElementById(`result-${type}`)
+  box.style.display = 'block'
+  document.getElementById(`rConf-${type}`).textContent = data.confidence + '%'
+  const isNormal = data.prediction === 'Normal'
+  const icon  = document.getElementById(`rIcon-${type}`)
+  const badge = document.getElementById(`rBadge-${type}`)
+  icon.className   = 'result-icon ' + (isNormal ? 'icon-normal' : 'icon-malignant')
+  icon.textContent = isNormal ? '✅' : '⚠️'
+  badge.textContent = isNormal ? 'Normal' : label2
+  badge.className  = 'result-label ' + (isNormal ? 'label-normal' : 'label-malignant')
+  const nConf = isNormal ? data.confidence : (100 - data.confidence)
+  const mConf = isNormal ? (100 - data.confidence) : data.confidence
+  document.getElementById(`nBar-${type}`).style.width = nConf + '%'
+  document.getElementById(`mBar-${type}`).style.width = mConf + '%'
+  document.getElementById(`nVal-${type}`).textContent = nConf.toFixed(2) + '%'
+  document.getElementById(`mVal-${type}`).textContent = mConf.toFixed(2) + '%'
+  renderRisk(type, data.risk_level)
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+
+function renderRisk(type, level) {
+  const cfg = RISK_CONFIG[level] || RISK_CONFIG['Low']
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`rs-${type}-${i}`)
+    el.className = 'risk-step'
+    if (i <= cfg.steps) el.classList.add(STEP_ACTIVE[i])
+  }
+  const badgeEl = document.getElementById(`riskBadge-${type}`)
+  badgeEl.className = 'risk-badge ' + cfg.cls
+  badgeEl.innerHTML = `${cfg.icon} ${level} Risk`
+  document.getElementById(`riskDesc-${type}`).textContent = cfg.desc
+  const section = document.getElementById(`riskSection-${type}`)
+  const borders = { Low:'#a9dfc3', Moderate:'#f9d98a', High:'#f9c49a', Critical:'#f5b7b1' }
+  const bgs     = { Low:'#eaf7f0', Moderate:'#fef9ec', High:'#fef4ec', Critical:'#fdf2f1' }
+  section.style.borderColor = borders[level] || '#cdd9e5'
+  section.style.background  = bgs[level]     || '#fff'
+}
+
+async function loadHistory(type, scanType, emptyIcon, emptyText) {
+  const grid = document.getElementById(`histGrid-${type}`)
+  try {
+    const res  = await fetch(`/history?scan_type=${scanType}`)
+    const data = await res.json()
+    grid.innerHTML = ''
+    if (!Array.isArray(data) || data.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-icon">${emptyIcon}</div>No ${emptyText} analysed yet.</div>`
+      return
+    }
+    data.forEach(item => {
+      const imgPath  = '/' + item.image.replace(/\\/g, '/')
+      const isNormal = item.prediction === 'Normal'
+      const predColor = isNormal ? '#1a7a4a' : '#c0392b'
+      const level    = item.risk_level || 'Low'
+      const cfg      = RISK_CONFIG[level] || RISK_CONFIG['Low']
+      grid.innerHTML += `
+        <div class="hist-card">
+          <div class="hist-img-wrap"><img src="${imgPath}" alt="scan" onerror="this.parentElement.textContent='${emptyIcon}'"></div>
+          <div class="hist-risk-strip ${cfg.stripCls}"></div>
+          <div class="hist-body">
+            <div class="hist-type">${scanType.replace('_',' ')}</div>
+            <div class="hist-pred" style="color:${predColor}">● ${item.prediction}</div>
+            <div class="hist-risk ${cfg.cls}">${cfg.icon} ${level} Risk</div>
+            <div class="hist-conf">${item.confidence}% confidence</div>
+            <div class="hist-time">${item.time}</div>
+            <button class="btn-delete" onclick="deleteRow(${item.id},'${type}','${scanType}','${emptyIcon}','${emptyText}')">Delete</button>
+          </div>
+        </div>`
+    })
+  } catch(e) { console.error('History load failed:', e) }
+}
+
+async function deleteRow(id, type, scanType, emptyIcon, emptyText) {
+  await fetch('/delete/' + id)
+  loadHistory(type, scanType, emptyIcon, emptyText)
+}
+</script>
+</body>
+</html>
